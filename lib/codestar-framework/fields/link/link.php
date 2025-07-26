@@ -69,7 +69,7 @@ if ( ! class_exists( 'CSF_Field_link' ) ) {
     public function add_wp_link_dialog() {
 
       if ( ! class_exists( '_WP_Editors' ) ) {
-        require_once ABSPATH . WPINC . '/class-wp-editor.php';
+        require_once ABSPATH . WPINC .'/class-wp-editor.php';
       }
 
       wp_print_styles( 'editor-buttons' );
