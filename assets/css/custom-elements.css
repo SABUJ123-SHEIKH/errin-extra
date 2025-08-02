@@ -771,6 +771,39 @@ h3.sw_title {
 }
 /* Widget Responsive CSS */
 
+/* Audio Player Css Start */
+
+.home__top__post__block .player-container{
+    padding: 0;
+}
+.home__top__post__block .track-info {
+    display: none;
+}
+.home__top__post__block .plyr{
+    position: absolute;
+    top: 0;
+    display: block;
+    width: 20px;
+    z-index: 2000;
+}
+.home__top__post__block .plyr__controls{
+    width: max-content;
+    border-radius: 50%;
+    background: red;
+}
+.home__top__post__block .plyr__controls__item{
+    display: none;
+}
+.plyr__controls__item.plyr__control {
+display: block;
+}
+.plyr--audio .plyr__controls__item.plyr__control:hover {
+background: #fff;
+    color: red;
+}
+/* Audio Player Css End */
+
+
 @media (max-width: 991px) { 
 
 	.home-top-block-inner{
