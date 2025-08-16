@@ -779,27 +779,33 @@ h3.sw_title {
 .home__top__post__block .track-info {
     display: none;
 }
-.home__top__post__block .plyr{
+.home__top__post__block .plyr.plyr--audio{
     position: absolute;
     top: 0;
     display: block;
     width: 20px;
     z-index: 2000;
 }
-.home__top__post__block .plyr__controls{
+.home__top__post__block .plyr.plyr--audio .plyr__controls{
     width: max-content;
-    border-radius: 50%;
-    background: red;
+    background: transparent;
 }
-.home__top__post__block .plyr__controls__item{
+.home__top__post__block .plyr.plyr--audio .plyr__controls__item{
     display: none;
 }
-.plyr__controls__item.plyr__control {
+.home__top__post__block .plyr.plyr--audio .plyr__controls__item.plyr__control[data-plyr="play"] {
 display: block;
+
+    padding: 20px;
 }
-.plyr--audio .plyr__controls__item.plyr__control:hover {
-background: #fff;
-    color: red;
+.home__top__post__block .plyr.plyr--audio .plyr__controls__item.plyr__control[data-plyr="play"] {
+    display: block;
+    padding: 15px;
+    border-radius: 50%;
+    color: #fff;
+}
+.home__top__post__block .plyr.plyr--audio .plyr__controls__item.plyr__control[data-plyr="play"]:hover {
+background: transparent;
 }
 /* Audio Player Css End */
 
