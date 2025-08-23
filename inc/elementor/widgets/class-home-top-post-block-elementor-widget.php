@@ -445,9 +445,23 @@ class errin_home_top_post_block extends Widget_Base
 							<div class="col-lg-8">
 								<div class="home-top-block-inner">
 									<div class="home-top-thumbnail-wrap">
-										<a href="<?php the_permalink(); ?>" class="home-top-thumbnail-one">
-											<img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>" alt="<?php the_title_attribute(); ?>">
-										</a>
+                                        <?php
+                                        $post_format = get_post_format();
+                                        if ($post_format === 'video') {
+                                            require ERRIN_THEME_DIR . '/template-parts/single/post-video.php';
+                                        } elseif ($post_format === 'audio') {
+                                            require ERRIN_THEME_DIR . '/template-parts/single/post-audio.php';
+                                        } else {
+                                            ?>
+                                            <a href="<?php the_permalink(); ?>" class="home-top-thumbnail-one">
+                                                <img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>"
+                                                     alt="<?php the_title_attribute(); ?>">
+                                            </a>
+
+                                            <?php
+                                        }
+                                        ?>
+
 									</div>
 
 									<div class="home-top-block-content">
@@ -494,9 +508,22 @@ class errin_home_top_post_block extends Widget_Base
 
 								<div class="home-top-block-inner">
 									<div class="home-top-thumbnail-wrap">
-										<a href="<?php the_permalink(); ?>" class="home-top-thumbnail-one">
-											<img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>" alt="<?php the_title_attribute(); ?>">
-										</a>
+                                        <?php
+                                        $post_format = get_post_format();
+                                        if ($post_format === 'video') {
+                                            require ERRIN_THEME_DIR . '/template-parts/single/post-video.php';
+                                        } elseif ($post_format === 'audio') {
+                                            require ERRIN_THEME_DIR . '/template-parts/single/post-audio.php';
+                                        } else {
+                                            ?>
+                                            <a href="<?php the_permalink(); ?>" class="home-top-thumbnail-one">
+                                                <img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>"
+                                                     alt="<?php the_title_attribute(); ?>">
+                                            </a>
+
+                                            <?php
+                                        }
+                                        ?>
 									</div>
 
 									<div class="home-top-block-content">

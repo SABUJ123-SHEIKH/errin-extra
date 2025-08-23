@@ -474,9 +474,23 @@ class errin_post_list_carousel extends Widget_Base
 				<div class="swiper-wrapper">
 					<?php while ($query->have_posts()) : $query->the_post(); ?>
 						<div class="post__list__item swiper-slide">
-							<div class="post_list_img">
-								<a href="<?php the_permalink(); ?>"><?php the_post_thumbnail(); ?></a>
-							</div>
+                            <div class="post_list_img">
+                            <?php
+                            $post_format = get_post_format();
+                            if ($post_format === 'video') {
+                                require ERRIN_THEME_DIR . '/template-parts/single/post-video.php';
+                            } elseif ($post_format === 'audio') {
+                                require ERRIN_THEME_DIR . '/template-parts/single/post-audio.php';
+                            } else {
+                                ?>
+
+                                    <a href="<?php the_permalink(); ?>"><?php the_post_thumbnail(); ?></a>
+
+
+                                <?php
+                            }
+                            ?>
+                            </div>
 							<div class="post__list__content">
 								
 								<h4 class="post-title">

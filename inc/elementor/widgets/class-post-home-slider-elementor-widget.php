@@ -190,7 +190,36 @@ class errin_post_home_slider extends Widget_Base
 
             ]
         );
-
+        $this->add_control(
+            'show_auto_slide',
+            [
+                'label' => esc_html__( 'Auto Slide', 'textdomain' ),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => esc_html__( 'Show', 'textdomain' ),
+                'label_off' => esc_html__( 'Off', 'textdomain' ),
+                'return_value' => 'true',
+                'default' => '',
+            ]
+        );
+        $this->add_control(
+            'show_mousewheel_slide',
+            [
+                'label' => esc_html__( 'Mouse Wheel', 'textdomain' ),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => esc_html__( 'Show', 'textdomain' ),
+                'label_off' => esc_html__( 'Off', 'textdomain' ),
+                'return_value' => 'true',
+                'default' => '',
+            ]
+        );
+        $this->add_control(
+            'slider_speed_number',
+            [
+                'label' => esc_html__('Slide Duration', 'errin-extra'),
+                'type' => Controls_Manager::NUMBER,
+                'default' => '2000',
+            ]
+        );
         $this->add_control(
             'post_offset_count',
             [
@@ -479,7 +508,20 @@ class errin_post_home_slider extends Widget_Base
         $display_excerpt = $settings['display_excerpt'];
         $display_blog_author = $settings['display_author'];
         $display_blog_date = $settings['display_date'];
-
+        $show_auto_slide = $settings['show_auto_slide'];
+        $show_mousewheel_slide = $settings['show_mousewheel_slide'];
+        $slider_speed_number = $settings['slider_speed_number'];
+        if(!empty($show_mousewheel_slide)):
+          $show_mousewheel_sliders =   esc_html__($show_mousewheel_slide);
+        else:
+            $show_mousewheel_sliders = esc_html__('false' , 'errin-extra');
+        endif;
+        if(!empty($show_auto_slide)):
+          $show_auto_sliders =   esc_html__($show_auto_slide);
+        else:
+            $show_auto_sliders = esc_html__('false' , 'errin-extra');
+        endif;
+//var_dump(show_auto_slide);
         $cat = get_the_category();
 
 
@@ -534,6 +576,9 @@ class errin_post_home_slider extends Widget_Base
                             spaceBetween: 30,
                             grabCursor: true,
                             loop: true,
+                            autoplay: <?php echo esc_html__($show_auto_sliders) ;?>,
+                            speed: <?php echo esc_html__($slider_speed_number) ;?>,
+                            mousewheel: <?php echo esc_html__($show_mousewheel_sliders) ;?>,
                             navigation: {
                                 nextEl: ".swiper-button-next",
                                 prevEl: ".swiper-button-prev",
@@ -559,14 +604,15 @@ class errin_post_home_slider extends Widget_Base
                                             require ERRIN_THEME_DIR . '/template-parts/single/post-audio.php';
                                         } else {
                                             ?>
-                                            <img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>"
-                                                 alt="<?php the_title_attribute(); ?>">
+                                            <a href="<?php the_permalink(); ?>" class="home-top-thumbnail-one">
+                                                <img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>"
+                                                     alt="<?php the_title_attribute(); ?>">
+                                            </a>
+                                          
                                             <?php
                                         }
                                         ?>
-                                        <a href="<?php the_permalink(); ?>" class="home-top-thumbnail-one">
 
-                                        </a>
                                     </div>
 
                                     <div class="home-top-block-content">
@@ -630,6 +676,9 @@ class errin_post_home_slider extends Widget_Base
                             spaceBetween: 30,
                             grabCursor: true,
                             loop: true,
+                            autoplay: <?php echo esc_html__($show_auto_sliders) ;?>,
+                            speed: <?php echo esc_html__($slider_speed_number) ;?>,
+                            mousewheel: <?php echo esc_html__($show_mousewheel_sliders) ;?>,
                             navigation: {
                                 nextEl: ".swiper-button-next",
                                 prevEl: ".swiper-button-prev",
@@ -657,10 +706,21 @@ class errin_post_home_slider extends Widget_Base
                             <div class="swiper-slide">
                                 <div class="home-top-block-inner">
                                     <div class="home-top-thumbnail-wrap">
-                                        <a href="<?php the_permalink(); ?>" class="home-top-thumbnail-one">
-                                            <img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>"
-                                                 alt="<?php the_title_attribute(); ?>">
-                                        </a>
+                                        <?php
+                                        $post_format = get_post_format();
+                                        if ($post_format === 'video') {
+                                            require ERRIN_THEME_DIR . '/template-parts/single/post-video.php';
+                                        } elseif ($post_format === 'audio') {
+                                            require ERRIN_THEME_DIR . '/template-parts/single/post-audio.php';
+                                        } else {
+                                            ?>
+                                            <a href="<?php the_permalink(); ?>" class="home-top-thumbnail-one">
+                                                <img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>"
+                                                     alt="<?php the_title_attribute(); ?>">
+                                            </a>
+                                            <?php
+                                        }
+                                        ?>
                                     </div>
 
                                     <div class="home-top-block-content">
