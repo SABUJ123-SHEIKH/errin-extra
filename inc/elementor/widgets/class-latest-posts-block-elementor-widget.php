@@ -83,7 +83,7 @@ class errin_latest_posts_block extends Widget_Base
 	 */
 
 
-	protected function register_controls()
+    protected function register_controls()
 	{
 		$this->post_query_options();
 		$this->meta_options();
@@ -527,189 +527,232 @@ class errin_latest_posts_block extends Widget_Base
         $this->end_controls_tabs();
         $this->end_controls_section();
 	}
+    private function render_post_item($settings){
+        ob_start(); ?>
+        <div class="latest_post_block_items">
+            <div class="latest_post_block_item_wrap">
+                <div class="latest-post-block-img">
+                    <?php
+                    $post_format = get_post_format();
+                    if ($post_format === 'video' || $post_format === 'audio') {
+                        if(has_post_thumbnail()){
+                            echo '<a href="'.get_permalink().'"><img src="'.esc_url(get_the_post_thumbnail_url(get_the_ID(),'full')).'" alt="'.get_the_title_attribute().'"></a>';
+                        }
+                    } else { ?>
+                        <a href="<?php the_permalink(); ?>">
+                            <img src="<?php echo esc_url(get_the_post_thumbnail_url(get_the_ID(),'full')); ?>" alt="<?php the_title_attribute(); ?>">
+                        </a>
+                    <?php } ?>
+                </div>
+                <div class="latest_post_block_contnt">
+                    <?php if(!empty($settings['show_cat']) && $settings['show_cat']==='yes'){ ?>
+                        <div class="htbc_category"><?php the_category(', '); ?></div>
+                    <?php } ?>
+                    <h3 class="post-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+                    <?php if(!empty($settings['show_desc']) && $settings['show_desc']==='yes'){ ?>
+                        <p><?php echo esc_html(wp_trim_words(get_the_excerpt(), intval($settings['desc_limit']), '')); ?></p>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
 
 
 
-	protected function render()
-	{
+    protected function render() {
+        $settings = $this->get_settings_for_display();
 
+        $section_widget_title = $settings['section_widget_title'];
+        $show_cat = $settings['show_cat'];
+        $show_desc = $settings['show_desc'];
+        $show_author = $settings['show_author'];
+        $show_date = $settings['show_date'];
+        $show_comment_count = $settings['show_comment_count'];
 
-		$settings = $this->get_settings_for_display();
+        $paged = (get_query_var('paged')) ? get_query_var('paged') : ((get_query_var('page')) ? get_query_var('page') : 1);
 
-		$section_widget_title = $settings['section_widget_title'];
+        $arg = [
+            'post_type'      => 'post',
+            'post_status'    => 'publish',
+            'order'          => $settings['post_order'],
+            'posts_per_page' => $settings['post_count'],
+            'tag__in'        => $settings['post_tags'],
+            'suppress_filters' => false,
+            'paged'          => $paged,
+        ];
 
-		$show_cat = $settings['show_cat'];
-		$show_desc = $settings['show_desc'];
-		$show_author = $settings['show_author'];
-		$show_date = $settings['show_date'];
-		$show_comment_count = $settings['show_comment_count'];
+        if (!empty($settings['post_cats'])) {
+            $arg['tax_query'] = [
+                [
+                    'taxonomy' => 'category',
+                    'terms'    => $settings['post_cats'],
+                    'field'    => 'id',
+                    'include_children' => true,
+                    'operator' => 'IN'
+                ],
+            ];
+        }
 
-		$paged = (get_query_var('paged')) ? get_query_var('paged') : ((get_query_var('page')) ? get_query_var('page') : 1);
+        switch ($settings['post_sortby']) {
+            case 'mostdiscussed': $arg['orderby'] = 'comment_count'; break;
+            case 'title': $arg['orderby'] = 'title'; break;
+            case 'ID': $arg['orderby'] = 'ID'; break;
+            case 'rand': $arg['orderby'] = 'rand'; break;
+            case 'name': $arg['orderby'] = 'name'; break;
+            default: $arg['orderby'] = 'date'; break;
+        }
 
+        $query = new \WP_Query($arg);
 
+        $ajax_json_data = json_encode([
+            'order'       => $settings['post_order'],
+            'posts_per_page' => $settings['post_count'],
+            'terms'       => $settings['post_cats'],
+            'tags'        => $settings['post_tags'],
+            'post_sortby' => $settings['post_sortby'],
+            'total_post'  => $query->found_posts,
+            'show_cat'    => $settings['show_cat'],
+            'show_author' => $settings['show_author'],
+            'show_date'   => $settings['show_date'],
+            'show_desc'   => $settings['show_desc'],
+            'desc_limit'  => $settings['desc_limit'],
+            'action'      => 'errin_load_more_posts', // AJAX handler
+            'nonce'       => wp_create_nonce('errin_load_more_nonce'), // security
+        ], JSON_HEX_APOS | JSON_HEX_QUOT);
 
+        $loadmore_class = 'post-grid-loadmore';
+        ?>
 
-		$arg = [
-			'post_type'   =>  'post',
-			'post_status' => 'publish',
-			'order' => $settings['post_order'],
-			'posts_per_page' => $settings['post_count'],
-			'tag__in' => $settings['post_tags'],
-			'suppress_filters' => false,
-			'paged' => $paged,
+        <?php if ($section_widget_title): ?>
+            <div class="section_widget_title">
+                <h3 class="sw_title"><?php echo esc_html($section_widget_title); ?></h3>
+            </div>
+        <?php endif; ?>
 
-		];
-
-		if ($settings['post_cats'] != '' && !empty($settings['post_cats'])) {
-
-			$arg['tax_query'] = array(
-				array(
-					'taxonomy' => 'category',
-					'terms'    => $settings['post_cats'],
-					'field' => 'id',
-					'include_children' => true,
-					'operator' => 'IN'
-				),
-			);
-		}
-
-		switch ($settings['post_sortby']) {
-			case 'mostdiscussed':
-				$arg['orderby'] = 'comment_count';
-				break;
-			case 'title':
-				$arg['orderby'] = 'title';
-				break;
-			case 'ID':
-				$arg['orderby'] = 'ID';
-				break;
-			case 'rand':
-				$arg['orderby'] = 'rand';
-				break;
-			case 'name':
-				$arg['orderby'] = 'name';
-				break;
-			default:
-				$arg['orderby'] = 'date';
-				break;
-		}
-
-		$query = new \WP_Query($arg);
-
-		$ajax_json_data = [
-			'order' => $settings['post_order'],
-			'posts_per_page' => $settings['post_count'],
-			'terms'          => $settings['post_cats'],
-			'tags'           => $settings['post_tags'],
-			'post_sortby'    => $settings['post_sortby'],
-			'total_post'     => $query->found_posts,
-			'show_cat'       => $settings['show_cat'],
-			'show_author'    => $settings['show_author'],
-			'show_date'      => $settings['show_date'],
-			'show_desc'      =>  $settings['show_desc'],
-			'desc_limit'     => $settings['desc_limit'],
-
-		];
-
-		$ajax_json_data = json_encode($ajax_json_data);
-
-		$loadmore_class = 'post-grid-loadmore';
-
-?>
-
-		<?php if ($section_widget_title) { ?>
-			<div class="section_widget_title">
-				<h3 class="sw_title"><?php echo esc_html($section_widget_title); ?></h3>
-			</div>
-		<?php } ?>
-
-		<?php if ($query->have_posts()) { ?>
-
-			<div class="latest_posts_block_wrap">
-
-
-				<?php while ($query->have_posts()) : $query->the_post(); ?>
-					<div class="latest_post_block_items">
-						<div class="latest_post_block_item_wrap">
-							<div class="latest-post-block-img">
+        <?php if ($query->have_posts()): ?>
+            <div class="latest_posts_block_wrap">
+                <?php while ($query->have_posts()) : $query->the_post(); ?>
+                    <div class="latest_post_block_items">
+                        <div class="latest_post_block_item_wrap">
+                            <div class="latest-post-block-img">
                                 <?php
                                 $post_format = get_post_format();
                                 if ($post_format === 'video') {
                                     require ERRIN_THEME_DIR . '/template-parts/single/post-video.php';
                                 } elseif ($post_format === 'audio') {
                                     require ERRIN_THEME_DIR . '/template-parts/single/post-audio.php';
-                                } else {
-                                    ?>
-                                    <a href="<?php the_permalink(); ?>" >
-                                        <img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>"
+                                } else { ?>
+                                    <a href="<?php the_permalink(); ?>">
+                                        <img src="<?php echo esc_url(get_the_post_thumbnail_url(null, 'full')); ?>"
                                              alt="<?php the_title_attribute(); ?>">
                                     </a>
+                                <?php } ?>
+                            </div>
+                            <div class="latest_post_block_contnt">
+                                <?php if ('yes' == $show_cat): ?>
+                                    <div class="htbc_category">
+                                        <?php require ERRIN_THEME_DIR . '/template-parts/cat-color.php'; ?>
+                                    </div>
+                                <?php endif; ?>
+                                <h3 class="post-title">
+                                    <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                                </h3>
+                                <div class="post-single-custom-meta">
+                                    <?php if ('yes' == $show_author): ?>
+                                        <div class="post-author-name">
+                                            <?php printf(
+                                                '%1$s<a href="%2$s">%3$s</a>',
+                                                get_avatar(get_the_author_meta('ID'), 32),
+                                                esc_url(get_author_posts_url(get_the_author_meta('ID'))),
+                                                get_the_author()
+                                            ); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if ('yes' == $show_date): ?>
+                                        <div class="blog_details__Date">
+                                            <i class="icon-calendar1"></i>
+                                            <?php echo esc_html(get_the_date('F j, Y')); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if ('yes' == $show_comment_count): ?>
+                                        <div class="post-comment-count">
+                                            <i class="icon-messages-11"></i>
+                                            <?php echo esc_html(get_comments_number(get_the_ID())); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ('yes' == $show_desc): ?>
+                                    <p><?php echo esc_html(wp_trim_words(get_the_excerpt(), $settings['desc_limit'], '')); ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            </div>
 
-                                    <?php
+            <?php if ($settings['show_more_post_btn'] == 'yes'): ?>
+                <div class="load__more__Post__btn">
+                    <a href="#" class="errin-load-more-btn"
+                       data-settings='<?php echo $ajax_json_data; ?>'
+                       data-page="1">
+                        <?php echo esc_html__('Read More', 'errin-extra'); ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+
+        <script>
+            jQuery(document).ready(function($){
+                $('.errin-load-more-btn').on('click', function(e){
+                    e.preventDefault();
+                    var button = $(this);
+                    var page = parseInt(button.attr('data-page')) + 1;
+                    var settings = button.data('settings');
+
+                    $.ajax({
+                        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                        type: 'POST',
+                        data: {
+                            action: settings.action,
+                            settings: settings,
+                            page: page,
+                            nonce: settings.nonce
+                        },
+                        success: function(response){
+                            if(response.success && response.data.html.trim() !== ''){
+                                // যদি নতুন পোস্ট আসে
+                                if(response.data.html.indexOf('No Post Here') !== -1){
+                                    button.hide(); // সব শেষ হলে button hide
+                                    $('.latest_posts_block_wrap').append(response.data.html);
+                                } else {
+                                    $('.latest_posts_block_wrap').append(response.data.html);
+                                    button.attr('data-page', page);
                                 }
-                                ?>
-							</div>
-							<div class="latest_post_block_contnt">
-								<?php if('yes' == $show_cat ){ ?>
-								<div class="htbc_category">
-									<?php require ERRIN_THEME_DIR . '/template-parts/cat-color.php'; ?>
-								</div>
-								<?php } ?>
-								<h3 class="post-title">
-									<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-								</h3>
+                            } else {
+                                button.hide(); // error বা শেষ পোস্টে hide
+                            }
+                        },
+                        error: function(){
+                            console.log('AJAX load more error');
+                        }
+                    });
+                });
+            });
 
-								<div class="post-single-custom-meta">
-								<?php if('yes' == $show_author ){ ?>
-									<div class="post-author-name">
-										<?php printf(
-											'%1$s<a href="%2$s">%3$s</a>',
-											get_avatar(get_the_author_meta('ID'), 32),
-											esc_url(get_author_posts_url(get_the_author_meta('ID'))),
-											get_the_author()
-										); ?>
+        </script>
 
-									</div>
-									<?php } 
-									if( 'yes' == $show_date ){
-									?>
-									<div class="blog_details__Date">
-										<i class="icon-calendar1"></i>
-										<?php echo esc_html(get_the_date('F j, Y')); ?>
-									</div>
-									<?php } 
-									if( 'yes' == $show_comment_count ){
-									?>
-									<div class="post-comment-count">
-										<i class="icon-messages-11"></i>
-										<?php echo esc_html__(get_comments_number(get_the_ID()), 'errin'); ?>
-									</div>
-									<?php } ?>
-								</div>
-								<?php if( 'yes' == $show_desc ){ ?>
-								<p><?php echo esc_html(wp_trim_words(get_the_excerpt(), $settings['desc_limit'], '')); ?></p>
-								<?php } ?>
-							</div>
-
-						</div>
-					</div>
-				<?php endwhile; ?>
-
-			</div>
-
-			<?php if ($settings['show_more_post_btn'] == 'yes') { ?>
-				<div class="load__more__Post__btn">
-					<a href="<?php echo get_permalink( get_option( 'page_for_posts' ) ) ?>"><?php echo esc_html__('Read More', 'errin-extra'); ?></a>
-				</div>
-		<?php }
-	
-	} 
-
-}
+        <?php
+        wp_reset_postdata();
+    }
 
 
-	protected function content_template()
+
+
+    protected function content_template()
 	{
+
 	}
 
 	public function posts_cat_list()

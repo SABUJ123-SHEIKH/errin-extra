@@ -60,12 +60,26 @@ if (!class_exists('Errin_Extra_Init')){
 	 * load plugin js
 	 * @since 1.0.0
 	 * */
-	public function load_plugin_js(){
+        public function load_plugin_js() {
+            wp_enqueue_script(
+                'errin-elementor',
+                ERRIN_EXTRA_JS . '/elementor.js',
+                array('jquery'),
+                '20190829',
+                true
+            );
 
-		wp_enqueue_script( 'errin-elementor', ERRIN_EXTRA_JS.'/elementor.js', array( 'jquery' ), '20190829', true );
-	
-	}
-	/**
+            wp_localize_script(
+                'errin-elementor', // <-- এখানে handle ঠিক করতে হবে
+                'errin_ajax_object',
+                [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce'    => wp_create_nonce('errin_ajax_nonce')
+                ]
+            );
+        }
+
+        /**
 	 * load plugin admin css
 	 * @since 1.0.0
 	 * */
@@ -119,3 +133,5 @@ if (!class_exists('Errin_Extra_Init')){
 if ( class_exists('Errin_Extra_Init')){
 	Errin_Extra_Init::getInstance();
 }
+
+
