@@ -540,9 +540,22 @@ class errin_featured_post_block extends Widget_Base
 							<div class="col-md-6">
 								<div class="featured_post_block_item">
 									<div class="featured-post-block-img">
-										<a href="<?php the_permalink(); ?>">
-											<img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>" alt="<?php the_title_attribute(); ?>">
-										</a>
+                                        <?php
+                                        $post_format = get_post_format();
+                                        if ($post_format === 'video') {
+                                            require ERRIN_THEME_DIR . '/template-parts/single/post-video.php';
+                                        } elseif ($post_format === 'audio') {
+                                            require ERRIN_THEME_DIR . '/template-parts/single/post-audio.php';
+                                        } else {
+                                            ?>
+                                            <a href="<?php the_permalink(); ?>" >
+                                                <img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>"
+                                                     alt="<?php the_title_attribute(); ?>">
+                                            </a>
+
+                                            <?php
+                                        }
+                                        ?>
 									</div>
 									<div class="featured-post-block-content">
 										<?php if( 'yes' == $show_cat ){ ?>
@@ -589,7 +602,7 @@ class errin_featured_post_block extends Widget_Base
 							</div>
 						<?php } else {	?>
 							<div class="col-6 col-md-3">
-								
+
 									<div class="featured_post_block_item_btm">
 										<div class="featured_post_block_btn_img">
 											<a href="<?php the_permalink(); ?>">

@@ -632,9 +632,22 @@ class errin_latest_posts_block extends Widget_Base
 					<div class="latest_post_block_items">
 						<div class="latest_post_block_item_wrap">
 							<div class="latest-post-block-img">
-								<a href="<?php the_permalink(); ?>">
-									<img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>" alt="<?php the_title_attribute(); ?>">
-								</a>
+                                <?php
+                                $post_format = get_post_format();
+                                if ($post_format === 'video') {
+                                    require ERRIN_THEME_DIR . '/template-parts/single/post-video.php';
+                                } elseif ($post_format === 'audio') {
+                                    require ERRIN_THEME_DIR . '/template-parts/single/post-audio.php';
+                                } else {
+                                    ?>
+                                    <a href="<?php the_permalink(); ?>" >
+                                        <img src="<?php echo esc_attr(esc_url(get_the_post_thumbnail_url(null, 'full'))); ?>"
+                                             alt="<?php the_title_attribute(); ?>">
+                                    </a>
+
+                                    <?php
+                                }
+                                ?>
 							</div>
 							<div class="latest_post_block_contnt">
 								<?php if('yes' == $show_cat ){ ?>
