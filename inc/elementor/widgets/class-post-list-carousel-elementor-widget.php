@@ -200,7 +200,25 @@ class errin_post_list_carousel extends Widget_Base
 			]
 		);
 
-
+        $this->add_control(
+            'show_auto_slide',
+            [
+                'label' => esc_html__( 'Auto Slide', 'textdomain' ),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => esc_html__( 'Show', 'textdomain' ),
+                'label_off' => esc_html__( 'Off', 'textdomain' ),
+                'return_value' => 'true',
+                'default' => '',
+            ]
+        );
+        $this->add_control(
+            'slider_speed_number',
+            [
+                'label' => esc_html__('Slide Duration', 'errin-extra'),
+                'type' => Controls_Manager::NUMBER,
+                'default' => '2000',
+            ]
+        );
 		$this->end_controls_section();
 	}
 
@@ -411,8 +429,14 @@ class errin_post_list_carousel extends Widget_Base
 		$post_sortby = $settings['post_sorting'];
 		$display_blog_author = $settings['display_author'];
 		$display_blog_date = $settings['display_date'];
+        $show_auto_slide = $settings['show_auto_slide'];
+        $slider_speed_number = $settings['slider_speed_number'];
 
-
+        if(!empty($show_auto_slide)):
+            $show_auto_sliders =   esc_html__($show_auto_slide);
+        else:
+            $show_auto_sliders = esc_html__('false' , 'errin-extra');
+        endif;
 		$args = [
 			'post_type' => 'post',
 			'post_status' => 'publish',
@@ -445,6 +469,8 @@ class errin_post_list_carousel extends Widget_Base
 					slidesPerView: 1,
 					spaceBetween: 30,
 					grabCursor: true,
+                    autoplay: <?php echo esc_html__($show_auto_sliders) ;?>,
+                    speed: <?php echo esc_html__($slider_speed_number) ;?>,
 					navigation: {
 						nextEl: ".swiper-button-next",
 						prevEl: ".swiper-button-prev",
