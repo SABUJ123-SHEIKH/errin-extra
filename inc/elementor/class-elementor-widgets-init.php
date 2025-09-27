@@ -171,69 +171,75 @@ function errin_load_more_posts() {
         'posts_per_page' => isset($settings['posts_per_page']) ? intval($settings['posts_per_page']) : 5,
         'paged'          => $page,
         'order'          => isset($settings['order']) ? $settings['order'] : 'DESC',
-        'tag__in'        => isset($settings['tags']) ? $settings['tags'] : [],
     ];
 
-    if(!empty($settings['terms'])){
-        $args['tax_query'] = [
-            [
-                'taxonomy' => 'category',
-                'field'    => 'id',
-                'terms'    => $settings['terms'],
-                'include_children' => true,
-                'operator' => 'IN'
-            ]
-        ];
-    }
-
-    switch($settings['post_sortby']){
-        case 'mostdiscussed': $args['orderby'] = 'comment_count'; break;
-        case 'title': $args['orderby'] = 'title'; break;
-        case 'ID': $args['orderby'] = 'ID'; break;
-        case 'rand': $args['orderby'] = 'rand'; break;
-        case 'name': $args['orderby'] = 'name'; break;
-        default: $args['orderby'] = 'date'; break;
-    }
-
     $query = new WP_Query($args);
-
     $html = '';
 
     if($query->have_posts()){
-        while($query->have_posts()): $query->the_post();
-            // Start output buffering
-            ob_start();
-            ?>
-            <div class="latest_post_block_items">
-                <div class="latest_post_block_item_wrap">
-                    <div class="latest-post-block-img">
-                        <?php
-                        $post_format = get_post_format();
-                        if ($post_format === 'video') {
-                            require ERRIN_THEME_DIR . '/template-parts/single/post-video.php';
-                        } elseif ($post_format === 'audio') {
-                            require ERRIN_THEME_DIR . '/template-parts/single/post-audio.php';
-                        } else { ?>
-                            <a href="<?php the_permalink(); ?>">
-                                <img src="<?php echo esc_url(get_the_post_thumbnail_url(null, 'full')); ?>"
-                                     alt="<?php the_title_attribute(); ?>">
-                            </a>
-                        <?php } ?>
-                    </div>
-                    <div class="latest_post_block_contnt">
-                        <?php if('yes' === $settings['show_cat']){ ?>
-                            <div class="htbc_category"><?php require ERRIN_THEME_DIR . '/template-parts/cat-color.php'; ?></div>
-                        <?php } ?>
-                        <h3 class="post-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
-                        <?php if('yes' === $settings['show_desc']){ ?>
-                            <p><?php echo esc_html(wp_trim_words(get_the_excerpt(), $settings['desc_limit'], '')); ?></p>
-                        <?php } ?>
+        ob_start();
+        ?>
+        <div class="latest_posts_block_wrap">
+            <?php while ($query->have_posts()) : $query->the_post(); ?>
+                <div class="latest_post_block_items">
+                    <div class="latest_post_block_item_wrap">
+                        <div class="latest-post-block-img">
+                            <?php
+                            $post_format = get_post_format();
+                            if ($post_format === 'video') {
+                                require ERRIN_THEME_DIR . '/template-parts/single/post-video.php';
+                            } elseif ($post_format === 'audio') {
+                                require ERRIN_THEME_DIR . '/template-parts/single/post-audio.php';
+                            } else { ?>
+                                <a href="<?php the_permalink(); ?>">
+                                    <img src="<?php echo esc_url(get_the_post_thumbnail_url(null, 'full')); ?>"
+                                         alt="<?php the_title_attribute(); ?>">
+                                </a>
+                            <?php } ?>
+                        </div>
+                        <div class="latest_post_block_contnt">
+                            <?php if (!empty($settings['show_cat']) && 'yes' === $settings['show_cat']): ?>
+                                <div class="htbc_category">
+                                    <?php require ERRIN_THEME_DIR . '/template-parts/cat-color.php'; ?>
+                                </div>
+                            <?php endif; ?>
+                            <h3 class="post-title">
+                                <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                            </h3>
+                            <div class="post-single-custom-meta">
+                                <?php if (!empty($settings['show_author']) && 'yes' === $settings['show_author']): ?>
+                                    <div class="post-author-name">
+                                        <?php printf(
+                                            '%1$s<a href="%2$s">%3$s</a>',
+                                            get_avatar(get_the_author_meta('ID'), 32),
+                                            esc_url(get_author_posts_url(get_the_author_meta('ID'))),
+                                            get_the_author()
+                                        ); ?>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!empty($settings['show_date']) && 'yes' === $settings['show_date']): ?>
+                                    <div class="blog_details__Date">
+                                        <i class="icon-calendar1"></i>
+                                        <?php echo esc_html(get_the_date('F j, Y')); ?>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!empty($settings['show_comment_count']) && 'yes' === $settings['show_comment_count']): ?>
+                                    <div class="post-comment-count">
+                                        <i class="icon-messages-11"></i>
+                                        <?php echo esc_html(get_comments_number(get_the_ID())); ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <?php if (!empty($settings['show_desc']) && 'yes' === $settings['show_desc']): ?>
+                                <p><?php echo esc_html(wp_trim_words(get_the_excerpt(), $settings['desc_limit'], '')); ?></p>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <?php
-            $html .= ob_get_clean(); // Append buffered HTML
-        endwhile;
+            <?php endwhile; ?>
+        </div>
+        <?php
+        $html = ob_get_clean();
         wp_reset_postdata();
     } else {
         $html = '<div class="no-more-posts" style="text-align:center; padding:20px; font-weight:bold;">No Post Here</div>';
@@ -242,4 +248,6 @@ function errin_load_more_posts() {
     wp_send_json_success(['html' => $html]);
     wp_die();
 }
+
+
 
