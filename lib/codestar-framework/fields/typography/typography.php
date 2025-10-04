@@ -110,7 +110,7 @@ if ( ! class_exists( 'CSF_Field_typography' ) ) {
               'Impact, Charcoal, sans-serif',
               "'Lucida Sans Unicode', 'Lucida Grande', sans-serif",
               'Tahoma, Geneva, sans-serif',
-              "'Trebuchet MS', Helvetica, sans-serif",
+              "'Trebuchet MS', Helvetica, sans-serif'",
               'Verdana, Geneva, sans-serif',
               "'Courier New', Courier, monospace",
               "'Lucida Console', Monaco, monospace",
@@ -518,7 +518,7 @@ if ( ! class_exists( 'CSF_Field_typography' ) ) {
         'word-spacing',
       );
 
-      $unit = ( ! empty( $this->value['unit'] ) ) ? $this->value['unit'] : 'px';
+      $unit = ( ! empty( $this->value['unit'] ) ) ? $this->value['unit'] : '';
       $line_height_unit = ( ! empty( $this->value['line_height_unit'] ) ) ? $this->value['line_height_unit'] : $unit;
 
       foreach ( $properties as $property ) {
